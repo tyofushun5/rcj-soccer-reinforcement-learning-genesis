@@ -57,7 +57,10 @@ wall = scene.add_entity(
         visualization=True,
         collision=True,
     ),
-    surface = gs.surfaces.Default(color=(0.0, 0.0, 0.0)),
+    material = None,
+    surface = gs.surfaces.Default(color=(0.0, 0.0, 0.0, 1.0)),
+    visualization_contact = False,
+    vis_mode = "visual"
 )
 
 blue_goal = scene.add_entity(
@@ -119,7 +122,6 @@ ball = scene.add_entity(
     ),
     surface=gs.surfaces.Default(color=(0.15, 0.15, 0.15)),
     entity=gs.entities.RigidEntity,
-    mass=0.10
 )
 
 scene.build()
@@ -214,7 +216,7 @@ class Ball(object):
 
     def create_ball(self):
         self.ball = scene.add_entity(
-            gs.morphs.Sphere(
+            morph = gs.morphs.Sphere(
                 pos=self.ball_cp,
                 euler=(0.0, 0.0, 0.0),
                 radius=0.037,
@@ -222,8 +224,9 @@ class Ball(object):
                 collision=True,
                 fixed=False,
             ),
+            material=None,
             surface=gs.surfaces.Default(color=(0.15, 0.15, 0.15)),
-            entity=gs.entities.RigidEntity,
-            mass=0.10
+            visualization_contact=False,
+            vis_mode="visual"
         )
         return self.ball
