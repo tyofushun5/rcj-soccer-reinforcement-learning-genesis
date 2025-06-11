@@ -46,7 +46,7 @@ scene = gs.Scene(
 plane = scene.add_entity(gs.morphs.Plane())
 
 wall = scene.add_entity(
-    gs.morphs.Mesh(
+    morph = gs.morphs.Mesh(
         file=wall_path,
         scale=(0.001, 0.001, 0.001),
         pos=(0.0, 0.0, 0.0),
@@ -57,7 +57,7 @@ wall = scene.add_entity(
         visualization=True,
         collision=True,
     ),
-    surface=gs.surfaces.Default(color=(0.0, 0.0, 0.0)),
+    surface = gs.surfaces.Default(color=(0.0, 0.0, 0.0)),
 )
 
 blue_goal = scene.add_entity(
