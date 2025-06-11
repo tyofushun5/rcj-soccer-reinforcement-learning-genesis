@@ -89,9 +89,6 @@ class Agent(Robot):
         self.start_pos = None
         self.default_ori = [0.0, 0.0, 0.0]
         self.position = self.start_pos
-        self.radius = 0.11
-        self.height = 0.11
-        self.mass = 1.4
 
     def create(self, position=None):
 

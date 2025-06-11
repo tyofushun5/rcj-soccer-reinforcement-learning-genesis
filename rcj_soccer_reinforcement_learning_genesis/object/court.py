@@ -1,10 +1,6 @@
-import abc
 import os
-import math
 
-import numpy as np
 import genesis as gs
-import torch
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -46,31 +42,84 @@ scene = gs.Scene(
     ),
     renderer=gs.renderers.Rasterizer(),
 )
-#
+
 plane = scene.add_entity(gs.morphs.Plane())
-# wall = scene.add_entity(
-#     gs.morphs.Mesh(
-#         file=wall_path,
-#         scale=(0.001, 0.001, 0.001),
-#         pos=(0.0, 1.0, 0.0),
-#         euler=(90.0, 0.0, 270.0),
-#         convexify=True,
-#         decimate=False,
-#         visualization=True,
-#         collision=True,
-#     ),
-# )
-goal = scene.add_entity(
+
+wall = scene.add_entity(
     gs.morphs.Mesh(
-        file=goal_path,
+        file=wall_path,
         scale=(0.001, 0.001, 0.001),
-        pos=(0.0, 1.0, 0.0),
+        pos=(0.0, 0.0, 0.0),
         euler=(90.0, 0.0, 270.0),
+        fixed=True,
         convexify=True,
         decimate=False,
         visualization=True,
         collision=True,
     ),
+    surface=gs.surfaces.Default(color=(0.0, 0.0, 0.0)),
+)
+
+blue_goal = scene.add_entity(
+    gs.morphs.Mesh(
+        file=goal_path,
+        scale=(0.001, 0.001, 0.001),
+        pos=(0.62, 0.02, 0.0),
+        euler=(90.0, 0.0, 270.0),
+        fixed=True,
+        convexify=True,
+        decimate=False,
+        visualization=True,
+        collision=True,
+        quality = True
+    ),
+    surface=gs.surfaces.Default(color=(0.0, 0.0, 1.0)),
+)
+
+yellow_goal = scene.add_entity(
+    gs.morphs.Mesh(
+        file=goal_path,
+        scale=(0.001, 0.001, 0.001),
+        pos=(1.24, 2.45, 0.0),
+        euler=(90.0, 0.0, 90.0),
+        fixed=True,
+        convexify=True,
+        decimate=False,
+        visualization=True,
+        collision=True,
+        quality = True
+    ),
+    surface=gs.surfaces.Default(color=(1.0, 1.0, 0.0)),
+)
+
+line = scene.add_entity(
+    gs.morphs.Mesh(
+        file=line_path,
+        scale=(0.001, 0.001, 0.001),
+        pos=(0.14, 0.14, 0.0),
+        euler=(0.0, 0.0, 0.0),
+        fixed=True,
+        convexify=True,
+        decimate=False,
+        visualization=True,
+        collision=True,
+        quality = True
+    ),
+    surface=gs.surfaces.Default(color=(1.0, 1.0, 1.0)),
+)
+
+ball = scene.add_entity(
+    gs.morphs.Sphere(
+        pos=(0.0, 0.0, 0.0),
+        euler = (0.0, 0.0, 0.0),
+        radius=0.037,
+        visualization=True,
+        collision=True,
+        fixed=False,
+    ),
+    surface=gs.surfaces.Default(color=(0.15, 0.15, 0.15)),
+    entity=gs.entities.RigidEntity,
+    mass=0.10
 )
 
 scene.build()
@@ -78,5 +127,103 @@ scene.build()
 for i in range(100000):
     scene.step()
 
+class Court(object):
+    def __init__(self, create_position=None):
+        if create_position is None:
+            create_position = [0.0, 0.0, 0.0]
+        self.cp = create_position
+        self.wall_position = [0.0 + self.cp[0], 0.0 + self.cp[1], 0.0 + self.cp[2]]
+        self.blue_goal_position = [0.62 + self.cp[0], 0.02 + self.cp[1], 0.0]
+        self.yellow_goal_position = [1.24 + self.cp[0], 2.45 + self.cp[1], 0.0]
+        self.line_position = [0.14 + self.cp[0], 0.14 + self.cp[1], 0.0 + self.cp[2]]
+        self.wall = None
+        self.blue_goal = None
+        self.yellow_goal = None
+        self.line = None
 
+    def create_court(self):
+        self.wall = scene.add_entity(
+            gs.morphs.Mesh(
+                file=wall_path,
+                scale=(0.001, 0.001, 0.001),
+                pos=self.wall_position,
+                euler=(90.0, 0.0, 270.0),
+                fixed=True,
+                convexify=True,
+                decimate=False,
+                visualization=True,
+                collision=True,
+            ),
+            surface=gs.surfaces.Default(color=(0.0, 0.0, 0.0)),
+        )
 
+        self.blue_goal = scene.add_entity(
+            gs.morphs.Mesh(
+                file=goal_path,
+                scale=(0.001, 0.001, 0.001),
+                pos=self.blue_goal_position,
+                euler=(90.0, 0.0, 270.0),
+                fixed=True,
+                convexify=True,
+                decimate=False,
+                visualization=True,
+                collision=True,
+                quality=True
+            ),
+            surface=gs.surfaces.Default(color=(0.0, 0.0, 1.0)),
+        )
+
+        self.yellow_goal = scene.add_entity(
+            gs.morphs.Mesh(
+                file=goal_path,
+                scale=(0.001, 0.001, 0.001),
+                pos=self.yellow_goal_position,
+                euler=(90.0, 0.0, 90.0),
+                fixed=True,
+                convexify=True,
+                decimate=False,
+                visualization=True,
+                collision=True,
+                quality=True
+            ),
+            surface=gs.surfaces.Default(color=(1.0, 1.0, 0.0)),
+        )
+
+        self.line = scene.add_entity(
+            gs.morphs.Mesh(
+                file=line_path,
+                scale=(0.001, 0.001, 0.001),
+                pos=self.line_position,
+                euler=(0.0, 0.0, 0.0),
+                fixed=False,
+                convexify=True,
+                decimate=False,
+                visualization=True,
+                collision=True,
+                quality=True
+            ),
+        )
+        return self.wall, self.blue_goal, self.yellow_goal, self.line
+
+class Ball(object):
+    def __init__(self, create_position=None):
+        if create_position is None:
+            create_position = [0.0, 0.0, 0.0]
+        self.ball_cp = create_position
+        self.ball = None
+
+    def create_ball(self):
+        self.ball = scene.add_entity(
+            gs.morphs.Sphere(
+                pos=self.ball_cp,
+                euler=(0.0, 0.0, 0.0),
+                radius=0.037,
+                visualization=True,
+                collision=True,
+                fixed=False,
+            ),
+            surface=gs.surfaces.Default(color=(0.15, 0.15, 0.15)),
+            entity=gs.entities.RigidEntity,
+            mass=0.10
+        )
+        return self.ball
