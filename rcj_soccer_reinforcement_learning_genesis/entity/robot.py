@@ -6,6 +6,8 @@ import numpy as np
 import genesis as gs
 import torch
 
+from rcj_soccer_reinforcement_learning_genesis.entity.entity import Robot
+
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -48,20 +50,6 @@ scene = gs.Scene(
 )
 #
 plane = scene.add_entity(gs.morphs.Plane())
-
-
-class Robot(metaclass=abc.ABCMeta):
-    @abc.abstractmethod
-    def __init__(self):
-        pass
-
-    @abc.abstractmethod
-    def create(self):
-        pass
-
-    @abc.abstractmethod
-    def action(self, robot_id, angle_deg, magnitude):
-        pass
 
 class Agent(Robot):
 

@@ -4,6 +4,8 @@ import os
 import numpy as np
 import genesis as gs
 
+from rcj_soccer_reinforcement_learning_genesis.entity.entity import Entity
+
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 stl_dir = os.path.join(script_dir, 'stl')
@@ -59,7 +61,7 @@ plane = scene.add_entity(
             vis_mode="visual"
 )
 
-class Wall(object):
+class Wall(Entity):
     def __init__(self, create_position=None):
         if create_position is None:
             create_position = [0.0, 0.0, 0.0]
@@ -92,20 +94,7 @@ class Wall(object):
         )
         return self.wall
 
-class Goal(metaclass=abc.ABCMeta):
-    @abc.abstractmethod
-    def __init__(self, create_position=None):
-        if create_position is None:
-            create_position = [0.0, 0.0, 0.0]
-        self.cp = create_position
-        self.goal = None
-        self.surfaces = None
-
-    @abc.abstractmethod
-    def create(self):
-        pass
-
-class BlueGoal(Goal):
+class BlueGoal(Entity):
     def __init__(self, create_position=None):
         if create_position is None:
             create_position = [0.0, 0.0, 0.0]
@@ -138,7 +127,7 @@ class BlueGoal(Goal):
         )
         return self.goal
 
-class YellowGoal(Goal):
+class YellowGoal(Entity):
     def __init__(self, create_position=None):
         if create_position is None:
             create_position = [0.0, 0.0, 0.0]
@@ -172,7 +161,7 @@ class YellowGoal(Goal):
         )
         return self.goal
 
-class Line(object):
+class Line(Entity):
     def __init__(self, create_position=None):
         if create_position is None:
             create_position = [0.0, 0.0, 0.0]
@@ -206,6 +195,30 @@ class Line(object):
         )
         return self.line
 
+class Ball(Entity):
+    def __init__(self, create_position=None):
+        if create_position is None:
+            create_position = [0.0, 0.0, 0.0]
+        self.ball_cp = create_position
+        self.ball = None
+
+    def create(self):
+        self.ball = scene.add_entity(
+            morph = gs.morphs.Sphere(
+                pos=self.ball_cp,
+                euler=(0.0, 0.0, 0.0),
+                radius=0.037,
+                visualization=True,
+                collision=True,
+                fixed=False,
+            ),
+            material=None,
+            surface=gs.surfaces.Default(color=(0.15, 0.15, 0.15)),
+            visualization_contact=False,
+            vis_mode="visual"
+        )
+        return self.ball
+
 class Court(object):
     def __init__(self, create_position=None):
         if create_position is None:
@@ -226,31 +239,6 @@ class Court(object):
         self.yellow_goal_entity = self.yellow_goal.create()
         self.line_entity = self.line.create()
         return self.wall_entity, self.blue_goal_entity, self.yellow_goal_entity, self.line_entity
-
-
-class Ball(object):
-    def __init__(self, create_position=None):
-        if create_position is None:
-            create_position = [0.0, 0.0, 0.0]
-        self.ball_cp = create_position
-        self.ball = None
-
-    def create_ball(self):
-        self.ball = scene.add_entity(
-            morph = gs.morphs.Sphere(
-                pos=self.ball_cp,
-                euler=(0.0, 0.0, 0.0),
-                radius=0.037,
-                visualization=True,
-                collision=True,
-                fixed=False,
-            ),
-            material=None,
-            surface=gs.surfaces.Default(color=(0.15, 0.15, 0.15)),
-            visualization_contact=False,
-            vis_mode="visual"
-        )
-        return self.ball
 
 
 court = Court([0.0, 0.0, 0.0])

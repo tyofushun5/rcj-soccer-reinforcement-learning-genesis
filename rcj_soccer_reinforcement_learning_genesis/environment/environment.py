@@ -20,7 +20,7 @@ class Environment(EnvBase):
             is_online = Binary(shape=(1,), dtype=torch.float32),
         )
         #Agentの行動空間
-        self.action_space = Composite(
+        self.action_spec = Composite(
             normalized_x_axis = Bounded(low=-1, high=1, shape=(1,), dtype=torch.float32),
             normalized_y_axis = Bounded(low=-1, high=1, shape=(1,), dtype=torch.float32),
         )
