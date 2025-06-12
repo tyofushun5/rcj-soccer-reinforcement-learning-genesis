@@ -7,7 +7,6 @@ import genesis as gs
 import torch
 
 
-
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 stl_dir = os.path.join(script_dir, 'stl')
@@ -49,23 +48,6 @@ scene = gs.Scene(
 )
 #
 plane = scene.add_entity(gs.morphs.Plane())
-agent = scene.add_entity(
-    gs.morphs.Mesh(
-        file=robot_collision_path,
-        scale=(0.0001, 0.0001, 0.0001),
-        pos = (0.0, 0.0, 0.0),
-        euler = (0.0, 0.0, 0.0),
-        convexify = True,
-        decimate = False,
-        visualization = True,
-        collision = True,
-    ),
-)
-
-scene.build()
-
-for i in range(100000):
-    scene.step()
 
 
 class Robot(metaclass=abc.ABCMeta):
@@ -83,12 +65,22 @@ class Robot(metaclass=abc.ABCMeta):
 
 class Agent(Robot):
 
-    def __init__(self, create_position):
+    def __init__(self, create_position=None):
         super().__init__()
+        if create_position is None:
+            create_position = [0.0, 0.0, 0.0]
         self.cp = create_position
         self.start_pos = None
         self.default_ori = [0.0, 0.0, 0.0]
         self.position = self.start_pos
+        self.agent = None
+        self.surfaces = gs.surfaces.Default(
+            color=(0.0, 0.0, 0.0),
+            opacity=1.0,
+            roughness=0.5,
+            metallic=0.0,
+            emissive=None
+        )
 
     def create(self, position=None):
 
@@ -97,18 +89,34 @@ class Agent(Robot):
         if position is None:
             self.position = self.start_pos
 
-        agent = scene.add_entity(
-            gs.morphs.Mesh(
-                file=robot_visual_path,
+        self.agent = scene.add_entity(
+            morph = gs.morphs.Mesh(
+                file=robot_collision_path,
                 scale=(0.0001, 0.0001, 0.0001),
-                pos=(0.0, 0.0, 0.0),
+                pos=self.cp,
                 euler=(0.0, 0.0, 0.0),
+                fixed=False,
                 convexify=True,
                 decimate=False,
                 visualization=True,
                 collision=True,
             ),
+            material=None,
+            surface=self.surfaces,
+            visualize_contact=False,
+            vis_mode="visual"
         )
 
-        return agent
+        return self.agent
 
+    def action(self, robot_id, angle_deg):
+        pass
+
+agent = Agent()
+agent.create()
+
+num = 10
+scene.build(n_envs=num, env_spacing=(0.5, 0.5))
+
+for i in range(100000):
+    scene.step()
