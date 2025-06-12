@@ -1,3 +1,4 @@
+import abc
 import os
 
 import genesis as gs
@@ -58,8 +59,13 @@ wall = scene.add_entity(
         collision=True,
     ),
     material = None,
-    surface = gs.surfaces.Default(color=(0.0, 0.0, 0.0, 1.0)),
-    visualization_contact = False,
+    surface = gs.surfaces.Default(
+        color=(0.0, 0.0, 0.0),
+        opacity=1.0,
+        roughness=0.5,
+        metallic=0.0,
+        emissive=None),
+    visualize_contact = False,
     vis_mode = "visual"
 )
 
@@ -121,7 +127,6 @@ ball = scene.add_entity(
         fixed=False,
     ),
     surface=gs.surfaces.Default(color=(0.15, 0.15, 0.15)),
-    entity=gs.entities.RigidEntity,
 )
 
 scene.build()
@@ -129,41 +134,70 @@ scene.build()
 for i in range(100000):
     scene.step()
 
-class Court(object):
+class Wall(object):
     def __init__(self, create_position=None):
         if create_position is None:
             create_position = [0.0, 0.0, 0.0]
         self.cp = create_position
-        self.wall_position = [0.0 + self.cp[0], 0.0 + self.cp[1], 0.0 + self.cp[2]]
-        self.blue_goal_position = [0.62 + self.cp[0], 0.02 + self.cp[1], 0.0]
-        self.yellow_goal_position = [1.24 + self.cp[0], 2.45 + self.cp[1], 0.0]
-        self.line_position = [0.14 + self.cp[0], 0.14 + self.cp[1], 0.0 + self.cp[2]]
         self.wall = None
-        self.blue_goal = None
-        self.yellow_goal = None
-        self.line = None
+        self.surfaces = gs.surfaces.Default(
+                color=(0.0, 0.0, 0.0),
+                opacity=1.0,
+                roughness=0.5,
+                metallic=0.0,
+                emissive=None)
 
-    def create_court(self):
+    def create(self):
         self.wall = scene.add_entity(
-            gs.morphs.Mesh(
-                file=wall_path,
-                scale=(0.001, 0.001, 0.001),
-                pos=self.wall_position,
-                euler=(90.0, 0.0, 270.0),
-                fixed=True,
-                convexify=True,
-                decimate=False,
-                visualization=True,
-                collision=True,
+            morph = gs.morphs.Mesh(
+                file = wall_path,
+                scale = (0.001, 0.001, 0.001),
+                pos = (0.0, 0.0, 0.0),
+                euler = (90.0, 0.0, 270.0),
+                fixed = True,
+                convexify = True,
+                decimate = False,
+                visualization = True,
+                collision = True,
             ),
-            surface=gs.surfaces.Default(color=(0.0, 0.0, 0.0)),
+            material = None,
+            surface = self.surfaces,
+            visualize_contact = False,
+            vis_mode = "visual"
         )
+        return self.wall
 
-        self.blue_goal = scene.add_entity(
+class Goal(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def __init__(self, create_position=None):
+        if create_position is None:
+            create_position = [0.0, 0.0, 0.0]
+        self.cp = create_position
+        self.goal = None
+        self.surfaces = None
+
+    @abc.abstractmethod
+    def create(self):
+        pass
+
+class BlueGoal(Goal):
+    def __init__(self, create_position=None):
+        if create_position is None:
+            create_position = [0.0, 0.0, 0.0]
+        self.cp = create_position
+        self.goal = None
+        self.surfaces = gs.surfaces.Default(
+                                    color=(0.0, 0.0, 1.0),
+                                    opacity=1.0,
+                                    roughness=0.5,
+                                    metallic=0.0,
+                                    emissive=None)
+    def create(self):
+        self.goal = scene.add_entity(
             gs.morphs.Mesh(
                 file=goal_path,
                 scale=(0.001, 0.001, 0.001),
-                pos=self.blue_goal_position,
+                pos=self.cp,
                 euler=(90.0, 0.0, 270.0),
                 fixed=True,
                 convexify=True,
@@ -172,14 +206,32 @@ class Court(object):
                 collision=True,
                 quality=True
             ),
-            surface=gs.surfaces.Default(color=(0.0, 0.0, 1.0)),
+            material=None,
+            surface=self.surfaces,
+            visualize_contact=False,
+            vis_mode="visual"
         )
+        return self.goal
 
-        self.yellow_goal = scene.add_entity(
+class YellowGoal(Goal):
+    def __init__(self, create_position=None):
+        if create_position is None:
+            create_position = [0.0, 0.0, 0.0]
+        self.cp = create_position
+        self.goal = None
+        self.surfaces = gs.surfaces.Default(
+                                    color=(1.0, 1.0, 0.0),
+                                    opacity=1.0,
+                                    roughness=0.5,
+                                    metallic=0.0,
+                                    emissive=None)
+
+    def create(self):
+        self.goal = scene.add_entity(
             gs.morphs.Mesh(
                 file=goal_path,
                 scale=(0.001, 0.001, 0.001),
-                pos=self.yellow_goal_position,
+                pos=self.cp,
                 euler=(90.0, 0.0, 90.0),
                 fixed=True,
                 convexify=True,
@@ -188,14 +240,32 @@ class Court(object):
                 collision=True,
                 quality=True
             ),
-            surface=gs.surfaces.Default(color=(1.0, 1.0, 0.0)),
+            material=None,
+            surface=self.surfaces,
+            visualize_contact=False,
+            vis_mode="visual"
         )
+        return self.goal
 
+class Line(object):
+    def __init__(self, create_position=None):
+        if create_position is None:
+            create_position = [0.0, 0.0, 0.0]
+        self.cp = create_position
+        self.line = None
+        self.surfaces = gs.surfaces.Default(
+                                    color=(1.0, 1.0, 1.0),
+                                    opacity=1.0,
+                                    roughness=0.5,
+                                    metallic=0.0,
+                                    emissive=None)
+
+    def create(self):
         self.line = scene.add_entity(
             gs.morphs.Mesh(
                 file=line_path,
                 scale=(0.001, 0.001, 0.001),
-                pos=self.line_position,
+                pos=self.cp,
                 euler=(0.0, 0.0, 0.0),
                 fixed=False,
                 convexify=True,
@@ -204,8 +274,91 @@ class Court(object):
                 collision=True,
                 quality=True
             ),
+            material=None,
+            surface=self.surfaces,
+            visualize_contact=False,
+            vis_mode="visual"
         )
-        return self.wall, self.blue_goal, self.yellow_goal, self.line
+        return self.line
+
+
+# class Court(object):
+#     def __init__(self, create_position=None):
+#         if create_position is None:
+#             create_position = [0.0, 0.0, 0.0]
+#         self.cp = create_position
+#         self.wall_position = [0.0 + self.cp[0], 0.0 + self.cp[1], 0.0 + self.cp[2]]
+#         self.blue_goal_position = [0.62 + self.cp[0], 0.02 + self.cp[1], 0.0]
+#         self.yellow_goal_position = [1.24 + self.cp[0], 2.45 + self.cp[1], 0.0]
+#         self.line_position = [0.14 + self.cp[0], 0.14 + self.cp[1], 0.0 + self.cp[2]]
+#         self.wall = None
+#         self.blue_goal = None
+#         self.yellow_goal = None
+#         self.line = None
+#
+#     def create_court(self):
+#         self.wall = scene.add_entity(
+#             gs.morphs.Mesh(
+#                 file=wall_path,
+#                 scale=(0.001, 0.001, 0.001),
+#                 pos=self.wall_position,
+#                 euler=(90.0, 0.0, 270.0),
+#                 fixed=True,
+#                 convexify=True,
+#                 decimate=False,
+#                 visualization=True,
+#                 collision=True,
+#             ),
+#             surface=gs.surfaces.Default(color=(0.0, 0.0, 0.0)),
+#         )
+#
+#         self.blue_goal = scene.add_entity(
+#             gs.morphs.Mesh(
+#                 file=goal_path,
+#                 scale=(0.001, 0.001, 0.001),
+#                 pos=self.blue_goal_position,
+#                 euler=(90.0, 0.0, 270.0),
+#                 fixed=True,
+#                 convexify=True,
+#                 decimate=False,
+#                 visualization=True,
+#                 collision=True,
+#                 quality=True
+#             ),
+#             surface=gs.surfaces.Default(color=(0.0, 0.0, 1.0)),
+#         )
+#
+#         self.yellow_goal = scene.add_entity(
+#             gs.morphs.Mesh(
+#                 file=goal_path,
+#                 scale=(0.001, 0.001, 0.001),
+#                 pos=self.yellow_goal_position,
+#                 euler=(90.0, 0.0, 90.0),
+#                 fixed=True,
+#                 convexify=True,
+#                 decimate=False,
+#                 visualization=True,
+#                 collision=True,
+#                 quality=True
+#             ),
+#             surface=gs.surfaces.Default(color=(1.0, 1.0, 0.0)),
+#         )
+#
+#         self.line = scene.add_entity(
+#             gs.morphs.Mesh(
+#                 file=line_path,
+#                 scale=(0.001, 0.001, 0.001),
+#                 pos=self.line_position,
+#                 euler=(0.0, 0.0, 0.0),
+#                 fixed=False,
+#                 convexify=True,
+#                 decimate=False,
+#                 visualization=True,
+#                 collision=True,
+#                 quality=True
+#             ),
+#         )
+#         return self.wall, self.blue_goal, self.yellow_goal, self.line
 
 class Ball(object):
     def __init__(self, create_position=None):
