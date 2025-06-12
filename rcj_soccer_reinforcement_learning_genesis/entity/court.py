@@ -62,10 +62,8 @@ plane = scene.add_entity(
 )
 
 class Wall(Entity):
-    def __init__(self, create_position=None):
-        if create_position is None:
-            create_position = [0.0, 0.0, 0.0]
-        self.cp = create_position
+    def __init__(self, position=None):
+        super().__init__(position)
         self.wall = None
         self.surfaces = gs.surfaces.Default(
                 color=(0.0, 0.0, 0.0),
@@ -79,7 +77,7 @@ class Wall(Entity):
             morph = gs.morphs.Mesh(
                 file = wall_path,
                 scale = (0.001, 0.001, 0.001),
-                pos = (0.0, 0.0, 0.0),
+                pos = self.position,
                 euler = (90.0, 0.0, 270.0),
                 fixed = True,
                 convexify = True,
@@ -95,10 +93,8 @@ class Wall(Entity):
         return self.wall
 
 class BlueGoal(Entity):
-    def __init__(self, create_position=None):
-        if create_position is None:
-            create_position = [0.0, 0.0, 0.0]
-        self.cp = create_position
+    def __init__(self, position=None):
+        super().__init__(position)
         self.goal = None
         self.surfaces = gs.surfaces.Default(
                                     color=(0.0, 0.0, 1.0),
@@ -111,7 +107,7 @@ class BlueGoal(Entity):
             gs.morphs.Mesh(
                 file=goal_path,
                 scale=(0.001, 0.001, 0.001),
-                pos=self.cp,
+                pos=self.position,
                 euler=(90.0, 0.0, 270.0),
                 fixed=True,
                 convexify=True,
@@ -128,10 +124,8 @@ class BlueGoal(Entity):
         return self.goal
 
 class YellowGoal(Entity):
-    def __init__(self, create_position=None):
-        if create_position is None:
-            create_position = [0.0, 0.0, 0.0]
-        self.cp = create_position
+    def __init__(self, position=None):
+        super().__init__(position)
         self.goal = None
         self.surfaces = gs.surfaces.Default(
                                     color=(1.0, 1.0, 0.0),
@@ -145,7 +139,7 @@ class YellowGoal(Entity):
             gs.morphs.Mesh(
                 file=goal_path,
                 scale=(0.001, 0.001, 0.001),
-                pos=self.cp,
+                pos=self.position,
                 euler=(90.0, 0.0, 90.0),
                 fixed=True,
                 convexify=True,
@@ -162,10 +156,8 @@ class YellowGoal(Entity):
         return self.goal
 
 class Line(Entity):
-    def __init__(self, create_position=None):
-        if create_position is None:
-            create_position = [0.0, 0.0, 0.0]
-        self.cp = create_position
+    def __init__(self, position=None):
+        super().__init__(position)
         self.line = None
         self.surfaces = gs.surfaces.Default(
                                     color=(1.0, 1.0, 1.0),
@@ -179,7 +171,7 @@ class Line(Entity):
             gs.morphs.Mesh(
                 file=line_path,
                 scale=(0.001, 0.001, 0.001),
-                pos=self.cp,
+                pos=self.position,
                 euler=(0.0, 0.0, 0.005),
                 fixed=False,
                 convexify=True,
@@ -196,16 +188,14 @@ class Line(Entity):
         return self.line
 
 class Ball(Entity):
-    def __init__(self, create_position=None):
-        if create_position is None:
-            create_position = [0.0, 0.0, 0.0]
-        self.ball_cp = create_position
+    def __init__(self, position=None):
+        super().__init__(position)
         self.ball = None
 
     def create(self):
         self.ball = scene.add_entity(
             morph = gs.morphs.Sphere(
-                pos=self.ball_cp,
+                pos=self.position,
                 euler=(0.0, 0.0, 0.0),
                 radius=0.037,
                 visualization=True,
@@ -219,21 +209,19 @@ class Ball(Entity):
         )
         return self.ball
 
-class Court(object):
-    def __init__(self, create_position=None):
-        if create_position is None:
-            create_position = [0.0, 0.0, 0.0]
-        self.cp = create_position
-        self.wall = Wall(create_position=self.cp)
-        self.blue_goal = BlueGoal(create_position=[0.62 + self.cp[0], 0.02 + self.cp[1], 0.0])
-        self.yellow_goal = YellowGoal(create_position=[1.24 + self.cp[0], 2.45 + self.cp[1], 0.0])
-        self.line = Line(create_position=[0.14 + self.cp[0], 0.14 + self.cp[1], 0.0])
+class Court(Entity):
+    def __init__(self, position=None):
+        super().__init__(position)
+        self.wall = Wall(position=self.position)
+        self.blue_goal = BlueGoal(position=[0.62 + self.position[0], 0.02 + self.position[1], 0.0])
+        self.yellow_goal = YellowGoal(position=[1.24 + self.position[0], 2.45 + self.position[1], 0.0])
+        self.line = Line(position=[0.14 + self.position[0], 0.14 + self.position[1], 0.0])
         self.wall_entity = None
         self.blue_goal_entity = None
         self.yellow_goal_entity = None
         self.line_entity = None
 
-    def create_court(self):
+    def create(self):
         self.wall_entity = self.wall.create()
         self.blue_goal_entity = self.blue_goal.create()
         self.yellow_goal_entity = self.yellow_goal.create()
@@ -242,7 +230,7 @@ class Court(object):
 
 
 court = Court([0.0, 0.0, 0.0])
-court.create_court()
+court.create()
 scene.build()
 
 for i in range(100000):
